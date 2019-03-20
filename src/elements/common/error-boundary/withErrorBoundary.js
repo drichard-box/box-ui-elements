@@ -8,13 +8,21 @@ import * as React from 'react';
 import DefaultError from './DefaultError';
 import ErrorBoundary from './ErrorBoundary';
 
-const withErrorBoundary = (errorOrigin: ElementOrigin, errorComponent: React.ComponentType<any> = DefaultError) => (
-    WrappedComponent: React.ComponentType<any>,
-) =>
-    React.forwardRef<Object, React.Ref<any>>((props: Object, ref: React.Ref<any>) => (
-        <ErrorBoundary errorComponent={errorComponent} errorOrigin={errorOrigin} {...props}>
-            <WrappedComponent ref={ref} />
-        </ErrorBoundary>
-    ));
+type ErrorBoundaryProps = React.ElementConfig<typeof ErrorBoundary>;
+type ProvidedErrorBoundaryProps = {
+    children: $PropertyType<ErrorBoundaryProps, 'children'>,
+    errorComponent: $PropertyType<ErrorBoundaryProps, 'errorComponent'>,
+    errorOrigin: $PropertyType<ErrorBoundaryProps, 'errorOrigin'>,
+};
+type RequiredErrorBoundaryProps = $Diff<ErrorBoundaryProps, ProvidedErrorBoundaryProps>;
+
+function withErrorBoundary<T: {}>(errorOrigin: ElementOrigin, errorComponent: React.ComponentType<any> = DefaultError) {
+    return (WrappedComponent: React.AbstractComponent<T>): React.AbstractComponent<RequiredErrorBoundaryProps & T> =>
+        React.forwardRef((props: Object, ref: React.Ref<any>) => (
+            <ErrorBoundary errorComponent={errorComponent} errorOrigin={errorOrigin} {...props}>
+                <WrappedComponent ref={ref} {...props} />
+            </ErrorBoundary>
+        ));
+}
 
 export default withErrorBoundary;
